@@ -17,7 +17,7 @@ class Cohort(models.Model):
 class Student(models.Model):
     name = models.CharField(max_length=150)
     email = models.CharField(max_length=150)
-    cohort = models.ForeignKey(Cohort, related_name='current-cohort', on_delete=models.CASCADE)
+    cohort = models.ForeignKey(Cohort, on_delete=models.CASCADE)
     ranking = models.PositiveIntegerField()
     assignment_completion = models.PositiveIntegerField()
     attendance_average = models.DecimalField(max_digits= 4, decimal_places= 2, default= 0.0)
@@ -36,7 +36,7 @@ CHOICES = (
 class DailyAttendance(models.Model):
     student = models.ForeignKey(Student, related_name='student', on_delete=models.CASCADE)
     date = models.DateField()
-    is_present = models.CharField(choices=CHOICES, default="present")    
+    is_present = models.CharField(choices=CHOICES, default="present", max_length=20)    
 
 
 ## A model for the student's attendance throughout the cohort in weekly breakdown   

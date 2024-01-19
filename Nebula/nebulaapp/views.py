@@ -25,6 +25,10 @@ async def fetch_students():
             if response == 200:
                 students = await response.json()
 
+                ## Fetch student data 
+                
+
+
 
 
 def login(request):
