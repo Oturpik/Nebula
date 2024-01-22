@@ -1,60 +1,37 @@
-from django.shortcuts import render
-import requests
-import aiohttp
-import asyncio
-from django.http import JsonResponse, HttpResponse
+from base64 import encode
+from email import message
+from pydoc_data.topics import topics
+from django.contrib import messages
+from django.shortcuts import render, redirect
 from django.db.models import Q
-
-# Create your views here.
-
-user_cache = {}
-
-async def fetch_student(session, email ):
-    user_url = f'https://labmero.com/nebula_server/api/student/{email}'
-    async with session.get(user_url) as response:
-        if response.status == 200:
-            user_data = await response.json()
-            # saving user data in cache for later retrieval
-            user_cache[email] = user_data
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
+from nebulaapp.models import Student, Cohort
 
 
-async def fetch_students():
-    url = f'https://labmero.com/nebula_server/api/students'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response == 200:
-                students = await response.json()
+def home(request):
+    # Search for the students and the specific cohorts
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    #Filter students in the search based on name email and cohort
+    students = Student.objects.filter(
+        Q(name__icontains = q) |
+        Q(email__icontains = q) |
+        Q(cohort__icontains = q)
+    )
+    # Filter Cohorts based on names searched
+    cohorts = Cohort.objects.filter(
+        Q(name__icontains = q)
+    )
+    total_students = students.count()
+    #all_attendance_average = 
+    #all_assignment_completion =
+    #cohort_performance_over_time =
 
-                ## Fetch student data 
-                
-
-
-
-
-def login(request):
-    if request.method == "POST":
-        ## We will use the email as the username and the cohort as the password
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        students_url = "https://labmero.com/nebula_server/api/students"
-        response = requests.get(students_url)
-        students_data = response.json()
-
-        ## Finding users with a matching email address and a cohort name
-        authenticated_student = None
-        for student in students_data:
-            if student['email'] == username and student['cohort'] == password:
-                authenticated_student = student
-                break
-        if authenticated_student:
-            return JsonResponse({'student': authenticated_student}, safe=False)
-        
-        else:
-            return JsonResponse({'student': '0'}, safe=False)
-    return render(request, 'index.html')
+    context = {'students':students, 'cohorts':cohorts, 'total_students':total_students}
+    return render(request, 'index.html', context)
 
 
-
-    
 
