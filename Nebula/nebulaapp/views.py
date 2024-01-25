@@ -74,11 +74,17 @@ async def fetch_cohort_stats(session, cohort_name):
 ## Getting  details on cohort attendance details
 cohort_attendance_cache = {}
 async def fetch_cohort_attendance_stats(session, cohort_name):
+    cached_attendance_data = cohort_attendance_cache.get(cohort_name)
+    if cached_attendance_data:
+        return JsonResponse(cached_attendance_data, safe=False)
+    
     cohort_attendance_url = f'https://labmero.com/nebula_server/api/cohort/attendance/{cohort_name}'
-    async with session.get(cohort_attendance_url) as response:
-        if response.status == 200:
-            cohort_attendance_data = await response.json()
-            cohort_attendance_cache[cohort_name] = cohort_attendance_data
+    async with aiohttp.ClientSession() as session:
+        async with session.get(cohort_attendance_url) as response:
+            if response.status == 200:
+                cohort_attendance_data = await response.json()
+                cohort_attendance_cache[cohort_name] = cohort_attendance_data
+                return JsonResponse(cached_attendance_data, safe=False)
 
 
 ##  Getting a Login view for students based on their information in the system. 

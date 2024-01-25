@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/students', views.fetch_students, name='all_students_list'), 
     path('api/student/<str:email>/', views.fetch_student, name='student'),
     path('api/cohort/stats/<str:cohort_name>/', views.fetch_cohort_stats, name='cohort_stats'),
+    path('api/cohort/attendance/<str:cohort_name>/', views.fetch_cohort_attendance_stats, name='cohort_attendance'), 
      
 ]
