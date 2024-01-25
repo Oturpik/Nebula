@@ -83,9 +83,13 @@ def login(request):
     return render(request, 'index.html')
 
 
-async def fetch_health_check():
-    url = f'http://127.0.0.1:8000/api/health-check'
+async def fetch_health_check(request):
+    url = 'https://labmero.com/nebula_server/api/health-check'    
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
-                return messages.add_message(request, messages.SUCCESS, "Your APIs are Healthy and Good to Go!" )
+                messages.add_message(request, messages.SUCCESS, "Your APIs are Healthy and Good to Go!")
+                return HttpResponse("Your APIs are Healthy and Good to Go!") 
+            else:
+                messages.add_message(request, messages.ERROR, f"Failed to fetch health check. Status code: {response.status}")
+                return HttpResponse(f"Error: Failed to fetch health check. Status code: {response.status}")
