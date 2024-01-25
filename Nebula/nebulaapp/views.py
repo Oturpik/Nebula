@@ -20,18 +20,19 @@ from django.db.utils import OperationalError
 
 
 user_cache = {}
-async def fetch_student(session, email ):
-    user_url = f'https://labmero.com/nebula_server/api/student/{email}'
-    async with session.get(user_url) as response:
-        if response.status == 200:
-            user_data = await response.json()
-            # saving user data in cache for later retrieval
-            user_cache[email] = user_data
+async def fetch_student(session, email):
+    cached_user_data = user_cache.get(email)
+    if cached_user_data:
+        return JsonResponse(cached_user_data, safe=False)
 
-            # # Getting the specific details for each student
-            # for user in user_data:
-            #     if user['id'] == user['weeklyAttendance']['student_id']:
-            #         return user
+    user_url = f'https://labmero.com/nebula_server/api/student/{email}'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(user_url) as response:
+            if response.status == 200:
+                user_data = await response.json()
+                user_cache[email] = user_data
+                return JsonResponse(user_data, safe=False)
+            
 
 ## getting a list of all the students in the program as per DB. 
 async def fetch_students(request):
