@@ -11,6 +11,7 @@ from django.contrib.auth.views import LoginView
 from nebulaapp.models import Student, Cohort
 from django.shortcuts import render
 import requests
+from requests import request
 import aiohttp
 import asyncio
 from django.http import JsonResponse, HttpResponse
@@ -58,7 +59,6 @@ async def fetch_cohort_attendance_stats(session, cohort_name):
             cohort_attendance_cache[cohort_name] = cohort_attendance_data
 
 
-
 def login(request):
     if request.method == "POST":
         ## We will use the email as the username and the cohort as the password
@@ -83,3 +83,9 @@ def login(request):
     return render(request, 'index.html')
 
 
+async def fetch_health_check():
+    url = f'http://127.0.0.1:8000/api/health-check'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                return messages.add_message(request, messages.SUCCESS, "Your APIs are Healthy and Good to Go!" )
