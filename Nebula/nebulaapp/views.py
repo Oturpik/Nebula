@@ -28,18 +28,30 @@ async def fetch_student(session, email ):
             # saving user data in cache for later retrieval
             user_cache[email] = user_data
 
-            # Getting the specific details for each student
-            for user in user_data:
-                if user['id'] == user['weeklyAttendance']['student_id']:
-                    return user
+            # # Getting the specific details for each student
+            # for user in user_data:
+            #     if user['id'] == user['weeklyAttendance']['student_id']:
+            #         return user
 
-async def fetch_students():
-    url = f'https://labmero.com/nebula_server/api/students'
+## getting a list of all the students in the program as per DB. 
+async def fetch_students(request):
+    url = 'https://labmero.com/nebula_server/api/students'
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            if response == 200:
-                students = await response.json() 
-
+            if response.status == 200:
+                students = await response.json()               
+                ## fetching individual students from the data returned from the API call and combine them
+                tasks = [fetch_student(session, student['email']) for student in students]
+                await asyncio.gather(*tasks)
+                
+                for student in students:
+                    student['email'] = user_cache.get(student['email'])
+                return JsonResponse(students, safe=False)
+                
+            else:
+                messages.add_message(request, messages.ERROR, f"Failed to fetch Students Details. Status code: {response.status}")
+                return HttpResponse(f"Error: Failed to fetch Students Details. Status code: {response.status}")
+            
 
 ## Getting details on Cohort stats
 cohort_stats_cache = {}
@@ -61,6 +73,7 @@ async def fetch_cohort_attendance_stats(session, cohort_name):
             cohort_attendance_cache[cohort_name] = cohort_attendance_data
 
 
+##  Getting a Login view for students based on their information in the system. 
 def login(request):
     if request.method == "POST":
         ## We will use the email as the username and the cohort as the password
