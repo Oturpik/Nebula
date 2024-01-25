@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/test-db-connection', views.fetch_dbconnection_check, name='db_check'),
     path('api/students', views.fetch_students, name='all_students_list'), 
     path('api/student/<str:email>/', views.fetch_student, name='student'),
+    path('api/cohort/stats/<str:cohort_name>/', views.fetch_cohort_stats, name='cohort_stats'),
      
 ]

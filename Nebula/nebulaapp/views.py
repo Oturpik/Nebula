@@ -19,6 +19,7 @@ from django.db import connections
 from django.db.utils import OperationalError
 
 
+## Getting the details of a specific student, using their email as their identifier
 user_cache = {}
 async def fetch_student(session, email):
     cached_user_data = user_cache.get(email)
@@ -57,11 +58,17 @@ async def fetch_students(request):
 ## Getting details on Cohort stats
 cohort_stats_cache = {}
 async def fetch_cohort_stats(session, cohort_name):
+    cached_stats_data = cohort_stats_cache.get(cohort_name)
+    if cached_stats_data:
+        return JsonResponse(cached_stats_data, safe=False)
+    
     cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}'
-    async with session.get(cohort_stats_url) as response:
-        if response.status == 200:
-            cohort_stats_data = await response.json()
-            cohort_stats_cache[cohort_name] = cohort_stats_data
+    async with aiohttp.ClientSession() as session:
+        async with session.get(cohort_stats_url) as response:
+            if response.status == 200:
+                stats_data = await response.json()
+                cohort_stats_cache[cohort_name] = stats_data
+                return JsonResponse(stats_data, safe=False)
 
 
 ## Getting  details on cohort attendance details
