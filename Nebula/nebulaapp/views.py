@@ -15,6 +15,8 @@ from requests import request
 import aiohttp
 import asyncio
 from django.http import JsonResponse, HttpResponse
+from django.db import connections
+from django.db.utils import OperationalError
 
 
 user_cache = {}
@@ -83,6 +85,7 @@ def login(request):
     return render(request, 'index.html')
 
 
+## Checking the status of the APIs
 async def fetch_health_check(request):
     url = 'https://labmero.com/nebula_server/api/health-check'    
     async with aiohttp.ClientSession() as session:
@@ -93,3 +96,14 @@ async def fetch_health_check(request):
             else:
                 messages.add_message(request, messages.ERROR, f"Failed to fetch health check. Status code: {response.status}")
                 return HttpResponse(f"Error: Failed to fetch health check. Status code: {response.status}")
+
+
+## Checking the status of the Database connection        
+def fetch_dbconnection_check(request):
+    try:        
+        connections['default'].ensure_connection()        
+        messages.add_message(request, messages.SUCCESS, "Your DB Connections are Healthy and Good to Go!")
+        return HttpResponse("Your DB Connections are Healthy and Good to Go!")
+    except OperationalError as e:        
+        messages.add_message(request, messages.ERROR, f"Failed to fetch health check. Error: {str(e)}")
+        return HttpResponse(f"Error: Failed to fetch health check. {str(e)}")            
