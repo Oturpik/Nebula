@@ -45,6 +45,7 @@ async def fetch_students(request):
                 ## fetching individual students from the data returned from the API call and combine them
                 tasks = [fetch_student(session, student['email']) for student in students]
                 await asyncio.gather(*tasks)
+                total_students = students[id].count()
                 
                 for student in students:
                     student['email'] = user_cache.get(student['email'])
@@ -113,16 +114,23 @@ def login(request):
 
 
 ## Checking the status of the APIs
-async def fetch_health_check(request):
-    url = 'https://labmero.com/nebula_server/api/health-check'    
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                messages.add_message(request, messages.SUCCESS, "Your APIs are Healthy and Good to Go!")
-                return HttpResponse("Your APIs are Healthy and Good to Go!") 
-            else:
-                messages.add_message(request, messages.ERROR, f"Failed to fetch health check. Status code: {response.status}")
-                return HttpResponse(f"Error: Failed to fetch health check. Status code: {response.status}")
+def fetch_health_check(request):
+    #url = 'https://labmero.com/nebula_server/api/health-check'
+    url = 'http://127.0.0.1:8000'
+
+    try:
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            messages.add_message(request, messages.SUCCESS, "Your APIs are Healthy and Good to Go!")
+            return HttpResponse("Your APIs are Healthy and Good to Go!")
+        else:
+            messages.add_message(request, messages.ERROR, f"Failed. Your APIs are Sick and need Fixing. Status code: {response.status_code}")
+            return HttpResponse(f"Error: Failed. Your APIs are Sick and need Fixing. Status code: {response.status_code}")
+
+    except requests.RequestException as e:
+        messages.add_message(request, messages.ERROR, f"Error during health check: {str(e)}")
+        return HttpResponse(f"Error: {str(e)}")
 
 
 ## Checking the status of the Database connection        
