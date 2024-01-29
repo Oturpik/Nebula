@@ -45,7 +45,7 @@ async def fetch_students(request):
                 ## fetching individual students from the data returned from the API call and combine them
                 tasks = [fetch_student(session, student['email']) for student in students]
                 await asyncio.gather(*tasks)
-                total_students = students[id].count()
+                #total_students = students[id].count()
                 
                 for student in students:
                     student['email'] = user_cache.get(student['email'])
@@ -115,8 +115,8 @@ def login(request):
 
 ## Checking the status of the APIs
 def fetch_health_check(request):
-    #url = 'https://labmero.com/nebula_server/api/health-check'
-    url = 'http://127.0.0.1:8000'
+    url = 'https://labmero.com/nebula_server/api/health-check'
+    #url = 'http://127.0.0.1:8000'
 
     try:
         response = requests.get(url)

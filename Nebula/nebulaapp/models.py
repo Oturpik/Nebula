@@ -8,6 +8,7 @@ class Cohort(models.Model):
     cohort_name = models.CharField(max_length=150)
     cohort_start = models.DateTimeField(auto_now_add=True)
     cohort_end = models.DateTimeField(auto_now=True)
+    completed_cohort = models.CharField(default=True, max_length=100)
 
     def __str__(self):
         return self.cohort_name
