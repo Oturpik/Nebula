@@ -17,6 +17,7 @@ import asyncio
 from django.http import JsonResponse, HttpResponse
 from django.db import connections
 from django.db.utils import OperationalError
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -57,22 +58,20 @@ async def fetch_students(request):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
-                students = await response.json()               
-                ## fetching individual students from the data returned from the API call and combine them
-                tasks = [fetch_student(session, student['email']) for student in students]
-                await asyncio.gather(*tasks)
-                #total_students = students[id].count()
-                
-                for student in students:
-                    student['email'] = user_cache.get(student['email'])
-                    #print(students)
+                students = await response.json()
+
+                # Allow users to search for specific students by email
+                search_query = request.GET.get('search', None)
+                if search_query:
+                    # If a search query is provided, filter students based on the query
+                    students = [student for student in students if search_query.lower() in student['email'].lower()]
+
+                # Return the list of students
                 return JsonResponse(students, safe=False)
-                
                 
             else:
                 messages.add_message(request, messages.ERROR, f"Failed to fetch Students Details. Status code: {response.status}")
-                return HttpResponse(f"Error: Failed to fetch Students Details. Status code: {response.status}")
-            
+                return HttpResponse(f"Error: Failed to fetch Students Details. Status code: {response.status}")                        
 
 ## Getting details on Cohort stats
 cohort_stats_cache = {}
@@ -159,6 +158,7 @@ async def fetch_cohort_attendance_stats(request, cohort_name):
 
 
 ##  Getting a Login view for students based on their information in the system. 
+@csrf_exempt
 def login(request):
     if request.method == "POST":
         ## We will use the email as the username and the cohort as the password
@@ -180,7 +180,7 @@ def login(request):
         
         else:
             return JsonResponse({'student': '0'}, safe=False)
-    return render(request, 'index.html')
+    return render(request, 'assets/index.html')
 
 
 ## Checking the status of the APIs
@@ -203,9 +203,10 @@ def fetch_health_check(request):
         return HttpResponse(f"Error: {str(e)}")
 
 
-## Checking the status of the Database connection        
+## Checking the status of the Database connection
+@csrf_exempt       
 def fetch_dbconnection_check(request):
-    my_db_name = 'nebula'
+    my_db_name = 'default'
     try:        
         connections[my_db_name].ensure_connection()        
         messages.add_message(request, messages.SUCCESS, "Your DB Connections are Healthy and Good to Go!")
