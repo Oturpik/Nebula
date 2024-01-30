@@ -63,7 +63,7 @@ async def fetch_students(request):
                 # Allow users to search for specific students by email
                 search_query = request.GET.get('search', None)
                 if search_query:
-                    # If a search query is provided, filter students based on the query
+                    
                     students = [student for student in students if search_query.lower() in student['email'].lower()]
 
                 # Return the list of students
@@ -79,13 +79,13 @@ cohort_stats_cache = {}
 async def fetch_cohort_stats(request, cohort_name):
     search_query = request.GET.get('search', None)
 
-    # If a search query is provided, modify the cohort_stats_url accordingly
+    
     if search_query:
         cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}?search={search_query}'
     else:
         cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}'
 
-    # Check if the data is cached
+    
     cached_stats_data = cohort_stats_cache.get(cohort_name)
     if cached_stats_data:
         return JsonResponse(cached_stats_data, safe=False)
@@ -179,7 +179,7 @@ def login(request):
             return JsonResponse({'student': authenticated_student}, safe=False)
         
         else:
-            return JsonResponse({'student': '0'}, safe=False)
+            return JsonResponse({'student': 'Not Logged'}, safe=False)
     return render(request, 'assets/index.html')
 
 
