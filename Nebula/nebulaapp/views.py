@@ -19,9 +19,12 @@ from django.db import connections
 from django.db.utils import OperationalError
 
 
+
+
 ## Getting the details of a specific student, using their email as their identifier
 user_cache = {}
-async def fetch_student(session, email):
+
+async def fetch_student(request, email):
     cached_user_data = user_cache.get(email)
     if cached_user_data:
         return JsonResponse(cached_user_data, safe=False)
@@ -31,8 +34,21 @@ async def fetch_student(session, email):
         async with session.get(user_url) as response:
             if response.status == 200:
                 user_data = await response.json()
+
+                # Extract attendance average and assignment completion from the response
+                attendance_average = user_data.get('attendance_average', 0)
+                assignment_completion = user_data.get('assignment_completion', 0)
+
+                # Add attendance average and assignment completion to the response
+                user_data['attendance_average'] = attendance_average
+                user_data['assignment_completion'] = assignment_completion
+
+                # Cache the result
                 user_cache[email] = user_data
+
                 return JsonResponse(user_data, safe=False)
+            else:
+                return JsonResponse({"error": f"Failed to fetch student data. Status code: {response.status}"}, status=500)
             
 
 ## getting a list of all the students in the program as per DB. 
@@ -49,7 +65,9 @@ async def fetch_students(request):
                 
                 for student in students:
                     student['email'] = user_cache.get(student['email'])
+                    #print(students)
                 return JsonResponse(students, safe=False)
+                
                 
             else:
                 messages.add_message(request, messages.ERROR, f"Failed to fetch Students Details. Status code: {response.status}")
@@ -58,34 +76,82 @@ async def fetch_students(request):
 
 ## Getting details on Cohort stats
 cohort_stats_cache = {}
-async def fetch_cohort_stats(session, cohort_name):
+
+async def fetch_cohort_stats(request, cohort_name):
+    search_query = request.GET.get('search', None)
+
+    # If a search query is provided, modify the cohort_stats_url accordingly
+    if search_query:
+        cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}?search={search_query}'
+    else:
+        cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}'
+
+    # Check if the data is cached
     cached_stats_data = cohort_stats_cache.get(cohort_name)
     if cached_stats_data:
         return JsonResponse(cached_stats_data, safe=False)
-    
-    cohort_stats_url = f'https://labmero.com/nebula_server/api/cohort/stats/{cohort_name}'
+
+    # Fetch cohort statistics from the API
     async with aiohttp.ClientSession() as session:
         async with session.get(cohort_stats_url) as response:
             if response.status == 200:
                 stats_data = await response.json()
+
+                # Calculate the sum of attendance averages across unique weeks
+                attendance_averages = [week.get('attendanceAverage', 0) for week in stats_data.get('weeks', [])]
+                total_attendance_average = sum(attendance_averages)
+
+                # Add the total attendance average to the response
+                stats_data['totalAttendanceAverage'] = total_attendance_average
+
+                # Include total_students, assignment_completion, and attendance_average in the response
+                stats_data['total_students'] = stats_data.get('total_students', 0)
+                stats_data['assignment_completion'] = stats_data.get('assignment_completion', 0)
+                stats_data['attendance_average'] = stats_data.get('attendance_average', 0)
+
+                # Cache the result
                 cohort_stats_cache[cohort_name] = stats_data
+
                 return JsonResponse(stats_data, safe=False)
+            else:
+                return JsonResponse({"error": f"Failed to fetch cohort stats. Status code: {response.status}"}, status=500)
 
 
 ## Getting  details on cohort attendance details
 cohort_attendance_cache = {}
-async def fetch_cohort_attendance_stats(session, cohort_name):
+async def fetch_cohort_attendance_stats(request, cohort_name):
+    search_query = request.GET.get('search', None)
+
+    # If a search query is provided, modify the cohort_stats_url accordingly
+    if search_query:
+        cohort_attendance_url = f'https://labmero.com/nebula_server/api/cohort/attendance/{cohort_name}?search={search_query}'
+    else:
+        cohort_attendance_url = f'https://labmero.com/nebula_server/api/cohort/attendance/{cohort_name}'
+
+    # Check if the data is cached
     cached_attendance_data = cohort_attendance_cache.get(cohort_name)
     if cached_attendance_data:
         return JsonResponse(cached_attendance_data, safe=False)
-    
-    cohort_attendance_url = f'https://labmero.com/nebula_server/api/cohort/attendance/{cohort_name}'
+
+    # Fetch cohort statistics from the API
     async with aiohttp.ClientSession() as session:
         async with session.get(cohort_attendance_url) as response:
             if response.status == 200:
-                cohort_attendance_data = await response.json()
-                cohort_attendance_cache[cohort_name] = cohort_attendance_data
-                return JsonResponse(cached_attendance_data, safe=False)
+                stats_data = await response.json()
+
+                # Calculate the sum of attendance averages across unique weeks
+                attendance_averages = [week.get('attendanceAverage', 0) for week in stats_data.get('week', [])]
+                total_attendance_average = sum(attendance_averages)
+
+                # Add the total attendance average to the response
+                stats_data['totalAttendanceAverage'] = total_attendance_average
+
+                # Cache the result
+                cohort_attendance_cache[cohort_name] = stats_data
+
+                return JsonResponse(stats_data, safe=False)
+            else:
+                return JsonResponse({"error": f"Failed to fetch cohort stats. Status code: {response.status}"}, status=500)
 
 
 ##  Getting a Login view for students based on their information in the system. 
@@ -115,8 +181,8 @@ def login(request):
 
 ## Checking the status of the APIs
 def fetch_health_check(request):
-    url = 'https://labmero.com/nebula_server/api/health-check'
-    #url = 'http://127.0.0.1:8000'
+    #url = 'https://labmero.com/nebula_server/api/health-check'
+    url = 'http://127.0.0.1:8000/api/health-check'
 
     try:
         response = requests.get(url)
@@ -142,3 +208,20 @@ def fetch_dbconnection_check(request):
     except OperationalError as e:        
         messages.add_message(request, messages.ERROR, f"Failed to fetch health check. Error: {str(e)}")
         return HttpResponse(f"Error: Failed to fetch health check. {str(e)}")            
+    
+
+def index(request):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    students = loop.run_until_complete(fetch_students(request))
+    
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    if q:
+        students = [student for student in students if q.lower() in student['name'].lower() or q.lower() in student['cohort'].lower()]
+
+        if students is not None:
+            context = {'students': students, 'q': q}
+            return render(request, 'assets/index.html', context)
+        else:
+            context = {'error_message': 'failed to fetch data from the API'}
+            return render(request, 'error.html', context)
