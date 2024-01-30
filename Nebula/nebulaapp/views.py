@@ -98,7 +98,7 @@ async def fetch_cohort_stats(request, cohort_name):
                 stats_data = await response.json()
 
                 # Calculate the sum of attendance averages across unique weeks
-                attendance_averages = [week.get('attendanceAverage', 0) for week in stats_data.get('weeks', [])]
+                attendance_averages = [week.get('attendanceAverage', 0) for week in stats_data.get('week', [])]
                 total_attendance_average = sum(attendance_averages)
 
                 # Add the total attendance average to the response
@@ -119,6 +119,7 @@ async def fetch_cohort_stats(request, cohort_name):
 
 ## Getting  details on cohort attendance details
 cohort_attendance_cache = {}
+
 async def fetch_cohort_attendance_stats(request, cohort_name):
     search_query = request.GET.get('search', None)
 
@@ -140,11 +141,14 @@ async def fetch_cohort_attendance_stats(request, cohort_name):
                 stats_data = await response.json()
 
                 # Calculate the sum of attendance averages across unique weeks
-                attendance_averages = [week.get('attendanceAverage', 0) for week in stats_data.get('week', [])]
-                total_attendance_average = sum(attendance_averages)
+                attendance_averages_list = [week.get('attendanceAverage') for week in stats_data]
+                attendance_averages = [float(item) for item in attendance_averages_list]
+                attendance_average = sum(attendance_averages)
+                print(attendance_average)
+
 
                 # Add the total attendance average to the response
-                stats_data['totalAttendanceAverage'] = total_attendance_average
+                #stats_data['totalAttendanceAverage'] = attendance_average
 
                 # Cache the result
                 cohort_attendance_cache[cohort_name] = stats_data
@@ -182,7 +186,7 @@ def login(request):
 ## Checking the status of the APIs
 def fetch_health_check(request):
     #url = 'https://labmero.com/nebula_server/api/health-check'
-    url = 'http://127.0.0.1:8000/api/health-check'
+    url = 'http://127.0.0.1:8000'
 
     try:
         response = requests.get(url)
@@ -201,8 +205,9 @@ def fetch_health_check(request):
 
 ## Checking the status of the Database connection        
 def fetch_dbconnection_check(request):
+    my_db_name = 'nebula'
     try:        
-        connections['default'].ensure_connection()        
+        connections[my_db_name].ensure_connection()        
         messages.add_message(request, messages.SUCCESS, "Your DB Connections are Healthy and Good to Go!")
         return HttpResponse("Your DB Connections are Healthy and Good to Go!")
     except OperationalError as e:        
@@ -210,18 +215,21 @@ def fetch_dbconnection_check(request):
         return HttpResponse(f"Error: Failed to fetch health check. {str(e)}")            
     
 
-def index(request):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    students = loop.run_until_complete(fetch_students(request))
+# def index(request):
+#     loop = asyncio.new_event_loop()
+#     asyncio.set_event_loop(loop)
+#     students = loop.run_until_complete(fetch_students(request))
     
-    q = request.GET.get('q') if request.GET.get('q') != None else ''
-    if q:
-        students = [student for student in students if q.lower() in student['name'].lower() or q.lower() in student['cohort'].lower()]
+#     q = request.GET.get('q') if request.GET.get('q') != None else ''
+#     if q:
+#         students = [student for student in students if q.lower() in student['name'].lower() or q.lower() in student['cohort'].lower()]
 
-        if students is not None:
-            context = {'students': students, 'q': q}
-            return render(request, 'assets/index.html', context)
-        else:
-            context = {'error_message': 'failed to fetch data from the API'}
-            return render(request, 'error.html', context)
+#         if students is not None:
+#             context = {'students': students, 'q': q}
+#             return render(request, 'assets/index.html', context)
+#         else:
+#             context = {'error_message': 'failed to fetch data from the API'}
+#             return render(request, 'error.html', context)
+
+def index(request):
+    return HttpResponse("This is the default view.")
