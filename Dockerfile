@@ -8,19 +8,6 @@ ENV PYTHONUNBUFFERED 1
 # makes a new folder within the container
 WORKDIR /nebula
 
-# Install system dependencies (including MySQL development libraries).From debugging process
-RUN apt-get update && apt-get install -y default-libmysqlclient-dev
-
-# Install system dependencies for lxml. From debugging process
-RUN apt-get update && apt-get install -y libxml2-dev libxslt-dev
-
-#Encountered challenges with MySQL. This should fix it
-RUN apt-get update
-
-# Check if libmysqlclient-dev package is available
-RUN apt-cache search libmysqlclient-dev
-
-
 
 # Outside container -> Inside container
 # contains libraries nessesary for running our app
@@ -29,8 +16,7 @@ COPY ./requirements.txt /nebula
 
 # Inside container
 # Installs the python libraries
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN  pip install -r requirements.txt
 
 # Outside container -> Inside container
 # means everything in the current directory. 
