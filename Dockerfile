@@ -1,4 +1,4 @@
-FROM python:3.12.0b4-slim-bullseye
+FROM python:3.11-slim-bookworm
 
 
 # Set environment variables (optional)
@@ -34,7 +34,9 @@ RUN python manage.py migrate
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # To build the image from these settings
-# docker build -t nebula:1.0 .
+# docker build --no-cache -t nebula:1.0 .
+
+# docker build --no-cache -t nebula:1.0 -f Dockerfile .
 
 # To check a list of the images that have been built/are available on your machine
 # docker images
