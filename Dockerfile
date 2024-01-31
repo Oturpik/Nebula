@@ -31,7 +31,7 @@ EXPOSE 8000
 ## commands below
 
 # python manage.py runserver --host=127.0.0.1:8000 --port=8000
-CMD ["bash", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 127.0.0.1:8000"]
+CMD ["bash", "-c", "python Nebula/manage.py makemigrations && python Nebula/manage.py migrate && python Nebula/manage.py runserver 127.0.0.1:8000"]
 
 
 # To build the image from these settings
