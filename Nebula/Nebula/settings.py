@@ -125,7 +125,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # }
 DATABASES = {
     'default': {
-        'ENGINE': 'postgresql://postgres:A6FF-D2fd4BggC1daCac*56gEc31gb3F@viaduct.proxy.rlwy.net:58929/railway',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'railway',
         'USER': 'postgres',
         'PASSWORD': 'A6FF-D2fd4BggC1daCac*56gEc31gb3F',
