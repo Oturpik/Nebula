@@ -28,10 +28,11 @@ COPY . /nebula/
 EXPOSE 8000
 
 #Applying Database migrations before running servers
-#RUN python manage.py migrate
+## commands below
 
 # python manage.py runserver --host=127.0.0.1:8000 --port=8000
-CMD ["python", "Nebula/manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["bash", "-c", "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 127.0.0.1:8000"]
+
 
 # To build the image from these settings
 # docker build --no-cache -t nebula:1.0 .
