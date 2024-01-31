@@ -11,7 +11,7 @@ WORKDIR /nebula
 
 # Outside container -> Inside container
 # contains libraries nessesary for running our app
-COPY ./requirements.txt /nebula
+COPY ./requirements.txt /nebula/
 
 
 # Inside container
@@ -21,7 +21,7 @@ RUN  pip install -r requirements.txt
 # Outside container -> Inside container
 # means everything in the current directory. 
 # . /AWS (Outside the container), second . /AWS (Inside the container)
-COPY . /nebula
+COPY . /nebula/
 
 # Setting environment variables They remain constant as the container is running
 
@@ -31,7 +31,7 @@ EXPOSE 8000
 RUN python manage.py migrate
 
 # python manage.py runserver --host=127.0.0.1:8000 --port=5432
-CMD ["python", "manage.py", "runserver", "127.0.0.1:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 # To build the image from these settings
 # docker build -t nebula:1.0 .
