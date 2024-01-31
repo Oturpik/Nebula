@@ -94,12 +94,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # MySQL DB  Configuration
 # DATABASES = {
@@ -123,6 +123,16 @@ DATABASES = {
 #         'PORT': '5432',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'postgresql://postgres:A6FF-D2fd4BggC1daCac*56gEc31gb3F@viaduct.proxy.rlwy.net:58929/railway',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'A6FF-D2fd4BggC1daCac*56gEc31gb3F',
+        'HOST': 'viaduct.proxy.rlwy.net',
+        'PORT': '58929',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

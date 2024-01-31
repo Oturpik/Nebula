@@ -30,7 +30,7 @@ EXPOSE 8000
 #Applying Database migrations before running servers
 #RUN python manage.py migrate
 
-# python manage.py runserver --host=127.0.0.1:8000 --port=5432
+# python manage.py runserver --host=127.0.0.1:8000 --port=8000
 CMD ["python", "Nebula/manage.py", "runserver", "0.0.0.0:8000"]
 
 # To build the image from these settings
@@ -42,7 +42,7 @@ CMD ["python", "Nebula/manage.py", "runserver", "0.0.0.0:8000"]
 # docker images
 
 # For port forwarding to make the app accessible publicly
-# docker run -p 5432:[containerport] --name [new-name] [containerid/containername]
+# docker run -p 8000:[containerport] --name [new-name] [containerid/containername]
 
 
 #DEBUGGING
