@@ -4,7 +4,11 @@ These instructions will help students to clone and host the React app on their G
 
 ## Prerequisites
 
-- GitHub account
+- GitHub account.
+
+- AWS Account
+
+- Docker for containerization
 
 ## Installation
 
