@@ -2,34 +2,26 @@
 
 These instructions will help students to clone and host the React app on their GitHub Pages.
 
-### Prerequisites
+## Prerequisites
 
 - GitHub account
 
-### Installation
+## Installation
 
-1. **Clone the Repository:**
+### 1. Clone the repository: git clone https://github.com/Tonny-Kioko/Project-Nebula.git
 
-   ```bash
-   git clone https://github.com/lawrencemuema/Nebula.git
-   cd Nebula
+### 2. Navigate to the project directory: "cd Nebula"
 
-   git checkout -b gh-pages
+### 3. Create a virtual environment: "python -m venv venv"
 
-   git add .
-   git commit -m "Add build files for GitHub Pages"
-   git push origin gh-pages
-   ```
+### 4. Activate the virtual environment: Windows - "venv\Scripts\activate"  MacOS and Linux - "source venv/bin/activate"
 
-2. **Using Github webpage:**
+### 5. Install the dependencies: "pip install -r requirements.txt"
 
-   ```bash
-   Go to your GitHub repository.
-   Navigate to "Settings" > "Pages" in the sidebar.
-   Select the "gh-pages" branch and the "root" directory.
-   ```
+### 6. Run database migrations "python manage.py migrate"
+
+### 7. Start the development server: "python manage.py runserver"
 
 
-After a few minutes, your React app will be available at https://your-username.github.io/your-repo/.
+### 8. Access the application in your web browser at 'http://localhost:8000'
 
-*If you face any redirection issues please reload the homepage: [yourgh-pages/Nebula](https://your-username.github.io/your-repo/.)https://your-username.github.io/your-repo/.
