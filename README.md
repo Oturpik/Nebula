@@ -12,7 +12,7 @@ These instructions will help students to clone and host the React app on their G
 
 ## Installation
 
-### 1. Clone the repository: git clone https://github.com/Tonny-Kioko/Project-Nebula.git
+### 1. Clone the repository : git clone https://github.com/Oturpik/Nebula.git
 
 ### 2. Navigate to the project directory: "cd Nebula"
 
